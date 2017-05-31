@@ -45,8 +45,11 @@ export class MultiselectDropdown implements OnInit, OnChanges, DoCheck, ControlV
   @Output() onAdded = new EventEmitter();
   @Output() onRemoved = new EventEmitter();
 
+  @Input() model: any[];
+  @Output() modelChanged = new EventEmitter<any[]>();
+
   @HostListener('document: click', ['$event.target'])
-  onClick(target: HTMLElement) {
+  onClick(target: HTMLElement | null) {
     if (!this.isVisible) return;
     let parentFound = false;
     while (target != null && !parentFound) {
@@ -61,7 +64,7 @@ export class MultiselectDropdown implements OnInit, OnChanges, DoCheck, ControlV
     }
   }
 
-  model: any[];
+  // model: any[];
   parents: any[];
   title: string;
   differ: any;
@@ -96,7 +99,7 @@ export class MultiselectDropdown implements OnInit, OnChanges, DoCheck, ControlV
 
   constructor(private element: ElementRef,
     differs: IterableDiffers) {
-    this.differ = differs.find([]).create(null);
+    this.differ = differs.find([]).create();
   }
 
   getItemStyle(option: IMultiSelectOption): any {
@@ -122,9 +125,12 @@ export class MultiselectDropdown implements OnInit, OnChanges, DoCheck, ControlV
     if (changes['texts'] && !changes['texts'].isFirstChange()) {
       this.updateTitle();
     }
+    if (changes['model']) {
+      console.log('model changed', this.model);
+    }
   }
 
-  onModelChange: Function = (_: any) => { };
+  onModelChange: Function = (_: any) => this.modelChanged.next(this.model);
   onModelTouched: Function = () => { };
 
   writeValue(value: any): void {
@@ -136,7 +142,10 @@ export class MultiselectDropdown implements OnInit, OnChanges, DoCheck, ControlV
   }
 
   registerOnChange(fn: Function): void {
-    this.onModelChange = fn;
+    this.onModelChange = () => {
+      this.modelChanged.next(this.model);
+      fn();
+    }
   }
 
   registerOnTouched(fn: Function): void {
@@ -155,7 +164,7 @@ export class MultiselectDropdown implements OnInit, OnChanges, DoCheck, ControlV
     }
   }
 
-  validate(_c: AbstractControl): { [key: string]: any; } {
+  validate(_c: AbstractControl): { [key: string]: any; } | null {
     return (this.model && this.model.length) ? null : {
       required: {
         valid: false,

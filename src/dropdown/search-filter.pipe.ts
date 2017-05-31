@@ -6,8 +6,13 @@ import { IMultiSelectOption } from './types';
 })
 export class MultiSelectSearchFilter implements PipeTransform {
   transform(options: Array<IMultiSelectOption>, args: string): Array<IMultiSelectOption> {
-    const matchPredicate = (option: IMultiSelectOption) => option.name.toLowerCase().indexOf((args || '').toLowerCase()) > -1,
-      getChildren = (option: IMultiSelectOption) => options.filter(child => child.parentId === option.id),
+    const matchPredicate = (option: IMultiSelectOption | undefined) => {
+      if (option !== undefined) {
+        return option.name.toLowerCase().indexOf((args || '').toLowerCase()) > -1;
+      }
+      return false;
+    };
+    const getChildren = (option: IMultiSelectOption) => options.filter(child => child.parentId === option.id),
       getParent = (option: IMultiSelectOption) => options.find(parent => option.parentId === parent.id);
     return options.filter((option: IMultiSelectOption) => {
       return matchPredicate(option) ||
