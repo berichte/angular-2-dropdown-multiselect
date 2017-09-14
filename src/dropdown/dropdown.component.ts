@@ -126,7 +126,7 @@ export class MultiselectDropdown implements OnInit, OnChanges, DoCheck, ControlV
       this.updateTitle();
     }
     if (changes['model']) {
-      console.log('model changed', this.model);
+      // console.log('model changed', this.model);
     }
   }
 
